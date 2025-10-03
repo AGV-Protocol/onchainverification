@@ -25,28 +25,28 @@ contract AGVOracle is AccessControl, Pausable, EIP712 {
 
     // --- Data Structures ---
     // Note: All date/datetime are UTC ISO-8601
-    
+
     // Maps to Daily_Snapshot fields, scaled for on-chain storage
     struct DailySnapshotData {
-        uint256 solarKWhSum_x10;      // kWh * 10 (Grid-Delivered Basis)
-        uint256 selfConsumedKWh_x10;  // kWh * 10 (Disclosure only)
-        uint256 computeHoursSum_x10;  // h * 10
-        uint16 records;               // Expected 96 (15-minute sampling)
-        bytes32 sheetSha256;          // SHA-256 of the canonical CSV file
-        address signer;               // EIP-712 signer
+        uint256 solarKWhSum_x10; // kWh * 10 (Grid-Delivered Basis)
+        uint256 selfConsumedKWh_x10; // kWh * 10 (Disclosure only)
+        uint256 computeHoursSum_x10; // h * 10
+        uint16 records; // Expected 96 (15-minute sampling)
+        bytes32 sheetSha256; // SHA-256 of the canonical CSV file
+        address signer; // EIP-712 signer
     }
 
     // Maps to Monthly_Settlement fields, scaled for on-chain storage
     struct MonthlySettlementData {
-        uint256 gridDeliveredKWh_x10;    // kWh * 10 (State Grid billed energy)
-        uint256 selfConsumedKWh_x10;     // kWh * 10 (Disclosure only)
-        uint256 tariff_bp;               // Tariff * 10,000 (Basis Points)
-        bytes32 monthFilesAggSha256;     // SHA-256 of all daily CSV hashes aggregated
-        bytes32 settlementPdfSha256;     // SHA-256 of State Grid bill PDF (Audit Master)
-        bytes32 bankSlipSha256;          // SHA-256 of bank receipt PDF (Optional)
-        uint8 revision;                  // Starts from 1
-        uint256 timestamp;               // Block timestamp when stored
-        address reconciler;              // Multisig/Role address that submitted
+        uint256 gridDeliveredKWh_x10; // kWh * 10 (State Grid billed energy)
+        uint256 selfConsumedKWh_x10; // kWh * 10 (Disclosure only)
+        uint256 tariff_bp; // Tariff * 10,000 (Basis Points)
+        bytes32 monthFilesAggSha256; // SHA-256 of all daily CSV hashes aggregated
+        bytes32 settlementPdfSha256; // SHA-256 of State Grid bill PDF (Audit Master)
+        bytes32 bankSlipSha256; // SHA-256 of bank receipt PDF (Optional)
+        uint8 revision; // Starts from 1
+        uint256 timestamp; // Block timestamp when stored
+        address reconciler; // Multisig/Role address that submitted
     }
 
     // Maps to EIP-712 structure for off-chain signing (DailySnapshot is the example)
@@ -79,39 +79,60 @@ contract AGVOracle is AccessControl, Pausable, EIP712 {
 
     // --- Events (IAGVOracle interface) ---
     // Daily snapshot event
-    event DailySnapshotStored(
-        bytes32 indexed snapshotHash,   // keccak256(JSON; sorted keys; integerized; scaled decimals)
-        string  date,                   // "YYYY-MM-DD" (UTC)
-        string  stationId,              //
-        uint256 solarKWhSum_x10,        // kWh*10
-        uint256 selfConsumedKWh_x10,    // kWh*10
-        uint256 computeHoursSum_x10,    // h*10
-        uint16  records,                // expected 96
-        bytes32 sheetSha256,            // daily CSV SHA-256
-        address signer                  // optional: EIP-712 signer
+    event DailySnapshotStored( // keccak256(JSON; sorted keys; integerized; scaled decimals)
+        // "YYYY-MM-DD" (UTC)
+        //
+        // kWh*10
+        // h*10
+        // expected 96
+        // daily CSV SHA-256
+        // optional: EIP-712 signer
+        bytes32 indexed snapshotHash,
+        string date,
+        string stationId,
+        uint256 solarKWhSum_x10,
+        // kWh*10
+        uint256 selfConsumedKWh_x10,
+        uint256 computeHoursSum_x10,
+        uint16 records,
+        bytes32 sheetSha256,
+        address signer
     );
 
     // Monthly settlement event
-    event MonthlySettlementStored(
-        string  period,                 // "YYYY-MM"
-        string  stationId,              //
-        uint256 gridDeliveredKWh_x10,   // kWh*10
-        uint256 selfConsumedKWh_x10,    // kWh*10
-        uint256 tariff_bp,              // tariff * 10000
-        bytes32 monthFilesAggSha256,    // aggregated hash
-        bytes32 settlementPdfSha256,    // State Grid bill PDF hash
-        bytes32 bankSlipSha256,         // bank receipt hash (optional)
-        uint8   revision,               // starts from 1
-        address reconciler              // multisig/role
+    event MonthlySettlementStored( // "YYYY-MM"
+        //
+        // kWh*10
+        // tariff * 10000
+        // aggregated hash
+        // State Grid bill PDF hash
+        // bank receipt hash (optional)
+        // starts from 1
+        // multisig/role
+        string period,
+        string stationId,
+        uint256 gridDeliveredKWh_x10,
+        // kWh*10
+        uint256 selfConsumedKWh_x10,
+        uint256 tariff_bp,
+        bytes32 monthFilesAggSha256,
+        bytes32 settlementPdfSha256,
+        bytes32 bankSlipSha256,
+        uint8 revision,
+        address reconciler
     );
 
     // Amendment event
-    event MonthlySettlementAmended(
-        string  period,                 //
-        string  stationId,              //
-        uint8   oldRevision,            //
-        uint8   newRevision,            //
-        string  reason                  // red invoice / supplement / cross-period correction / other
+    event MonthlySettlementAmended( //
+        //
+        // red invoice / supplement / cross-period correction / other
+        string period,
+        string stationId,
+        //
+        uint8 oldRevision,
+        uint8 newRevision,
+        //
+        string reason
     );
 
     constructor(address _admin, address[] memory _initialTechTeam, address[] memory _initialSettlementMultisig)
@@ -119,13 +140,13 @@ contract AGVOracle is AccessControl, Pausable, EIP712 {
     {
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(SETTLEMENT_MULTISIG, _admin); // Grant admin the multisig role for initial setup
-        
+
         // Grant initial roles
         for (uint256 i = 0; i < _initialTechTeam.length; i++) {
             _grantRole(ORACLE_TEAM, _initialTechTeam[i]);
         }
         for (uint256 i = 0; i < _initialSettlementMultisig.length; i++) {
-             // For a real multisig, this address would be the Gnosis/Safe contract address
+            // For a real multisig, this address would be the Gnosis/Safe contract address
             _grantRole(SETTLEMENT_MULTISIG, _initialSettlementMultisig[i]);
         }
     }
@@ -156,7 +177,7 @@ contract AGVOracle is AccessControl, Pausable, EIP712 {
         bytes32 digest = _hashTypedDataV4(structHash);
         address signer = digest.recover(signature);
         require(signer != address(0), "Invalid signature or signer");
-        
+
         // 2. Validate/Store
         require(data.records == 96, "Records must be 96"); // Validation: records = 96
 
@@ -176,7 +197,7 @@ contract AGVOracle is AccessControl, Pausable, EIP712 {
         // Hash for the event is keccak256(JSON; sorted keys; integerized; scaled decimals)
         // In Solidity, we can re-create the hash by abi.encodePacked to avoid external JSON parsing.
         // We use the EIP-712 structure hash (digest) which includes all necessary fields.
-        
+
         emit DailySnapshotStored(
             digest, // EIP-712 Digest serves as the snapshotHash
             data.date,
@@ -210,9 +231,10 @@ contract AGVOracle is AccessControl, Pausable, EIP712 {
         bytes32 monthFilesAggSha256,
         bytes32 settlementPdfSha256,
         bytes32 bankSlipSha256
-    ) external
-      whenNotPaused
-      onlyRole(SETTLEMENT_MULTISIG) // Multisig-gated (Finance + Tech)
+    )
+        external
+        whenNotPaused
+        onlyRole(SETTLEMENT_MULTISIG) // Multisig-gated (Finance + Tech)
     {
         uint8 currentRevision = effectiveRevision[stationId][period];
         require(currentRevision == 0, "Initial settlement already stored. Use amendMonthlySettlement.");
@@ -271,9 +293,10 @@ contract AGVOracle is AccessControl, Pausable, EIP712 {
         bytes32 monthFilesAggSha256,
         bytes32 settlementPdfSha256,
         bytes32 bankSlipSha256
-    ) external
-      whenNotPaused
-      onlyRole(SETTLEMENT_MULTISIG) // Multisig-gated
+    )
+        external
+        whenNotPaused
+        onlyRole(SETTLEMENT_MULTISIG) // Multisig-gated
     {
         uint8 oldRevision = effectiveRevision[stationId][period];
         require(oldRevision > 0, "No initial settlement to amend.");
