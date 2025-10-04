@@ -488,7 +488,6 @@ contract AGVOracleTest is Test {
         oracle.getMonthlySettlementByRevision("2025-01", "STATION-001", 99);
     }
 
-
     function externalGetMonthlySettlementByRevision(string calldata period, string calldata stationId, uint8 revision)
         external
         view
