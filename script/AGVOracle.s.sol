@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
 import "../src/AGVOracle.sol";
@@ -16,14 +16,14 @@ contract DeployAGVOracle is Script {
     function run() external returns (AGVOracle) {
         // Load deployer private key
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        
+
         // Load configuration
         address admin = vm.envAddress("ADMIN_ADDRESS");
-        
+
         // Tech team addresses
         address techTeam1 = vm.envAddress("TECH_TEAM_1");
         address techTeam2 = vm.envAddress("TECH_TEAM_2");
-        
+
         // Settlement multisig addresses
         address settlementMultisig1 = vm.envAddress("SETTLEMENT_MULTISIG_1");
         address settlementMultisig2 = vm.envAddress("SETTLEMENT_MULTISIG_2");
@@ -32,7 +32,7 @@ contract DeployAGVOracle is Script {
         address[] memory techTeam = new address[](2);
         techTeam[0] = techTeam1;
         techTeam[1] = techTeam2;
-        
+
         address[] memory settlementMultisig = new address[](2);
         settlementMultisig[0] = settlementMultisig1;
         settlementMultisig[1] = settlementMultisig2;
@@ -51,13 +51,9 @@ contract DeployAGVOracle is Script {
 
         // Deploy
         vm.startBroadcast(deployerPrivateKey);
-        
-        AGVOracle oracle = new AGVOracle(
-            admin,
-            techTeam,
-            settlementMultisig
-        );
-        
+
+        AGVOracle oracle = new AGVOracle(admin, techTeam, settlementMultisig);
+
         vm.stopBroadcast();
 
         // Log results
