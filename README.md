@@ -12,19 +12,19 @@ AGVOracle is an on-chain oracle contract that:
 
 ## Key Features
 
-### 📊 Daily Snapshots
+###  Daily Snapshots
 - 15-minute interval data (96 records per day)
 - EIP-712 signed attestations from tech team
 - Immutable once stored (evidence layer only)
 - Grid-delivered and self-consumed energy tracking
 
-### 💰 Monthly Settlements
+###  Monthly Settlements
 - State Grid bill reconciliation (audit master)
 - Versioned amendments with full history
 - Multi-signature authorization required
 - SHA-256 verification of supporting documents
 
-### 🔐 Security
+###  Security
 - Role-based access control (OpenZeppelin)
 - Pausable emergency stop mechanism
 - EIP-712 typed data signing
@@ -141,7 +141,7 @@ forge script script/DeployAGVOracle.s.sol:DeployAGVOracle \
   -vvvv
 ```
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+<!-- See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions. -->
 
 ## Usage
 
