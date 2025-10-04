@@ -79,14 +79,14 @@ contract AGVOracle is AccessControl, Pausable, EIP712 {
 
     // --- Events (IAGVOracle interface) ---
     // Daily snapshot event
+    // "YYYY-MM-DD" (UTC)
+    //
+    // kWh*10
+    // h*10
+    // expected 96
+    // daily CSV SHA-256
+    // optional: EIP-712 signer
     event DailySnapshotStored( // keccak256(JSON; sorted keys; integerized; scaled decimals)
-        // "YYYY-MM-DD" (UTC)
-        //
-        // kWh*10
-        // h*10
-        // expected 96
-        // daily CSV SHA-256
-        // optional: EIP-712 signer
         bytes32 indexed snapshotHash,
         string date,
         string stationId,
@@ -100,15 +100,15 @@ contract AGVOracle is AccessControl, Pausable, EIP712 {
     );
 
     // Monthly settlement event
+    //
+    // kWh*10
+    // tariff * 10000
+    // aggregated hash
+    // State Grid bill PDF hash
+    // bank receipt hash (optional)
+    // starts from 1
+    // multisig/role
     event MonthlySettlementStored( // "YYYY-MM"
-        //
-        // kWh*10
-        // tariff * 10000
-        // aggregated hash
-        // State Grid bill PDF hash
-        // bank receipt hash (optional)
-        // starts from 1
-        // multisig/role
         string period,
         string stationId,
         uint256 gridDeliveredKWh_x10,
@@ -123,9 +123,9 @@ contract AGVOracle is AccessControl, Pausable, EIP712 {
     );
 
     // Amendment event
+    //
+    // red invoice / supplement / cross-period correction / other
     event MonthlySettlementAmended( //
-        //
-        // red invoice / supplement / cross-period correction / other
         string period,
         string stationId,
         //

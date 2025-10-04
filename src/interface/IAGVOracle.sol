@@ -9,15 +9,15 @@ pragma solidity ^0.8.19;
 interface IAGVOracle {
     // ===== Daily snapshot (evidence only; not mint-determining) =====
     // Event emitted when a daily snapshot is stored on-chain.
+    // "YYYY-MM-DD" (UTC) [cite: 66]
+    // [cite: 67]
+    // kWh*10 [cite: 68]
+    // kWh*10 [cite: 69]
+    // h*10 [cite: 70]
+    // expected 96 [cite: 71]
+    // daily CSV SHA-256 [cite: 72]
+    // optional: EIP-712 signer [cite: 73]
     event DailySnapshotStored( // keccak256(JSON; sorted keys; integerized; scaled decimals) [cite: 65]
-        // "YYYY-MM-DD" (UTC) [cite: 66]
-        // [cite: 67]
-        // kWh*10 [cite: 68]
-        // kWh*10 [cite: 69]
-        // h*10 [cite: 70]
-        // expected 96 [cite: 71]
-        // daily CSV SHA-256 [cite: 72]
-        // optional: EIP-712 signer [cite: 73]
         bytes32 indexed snapshotHash,
         string date,
         string stationId,
@@ -31,16 +31,16 @@ interface IAGVOracle {
 
     // ===== Monthly settlement (sole minting anchor) =====
     // Event emitted when a monthly settlement (or a new revision) is stored.
+    // [cite: 78]
+    // kWh*10 [cite: 79]
+    // kWh*10 [cite: 80]
+    // tariff * 10000 [cite: 81]
+    // aggregated hash [cite: 82]
+    // State Grid bill PDF hash [cite: 83]
+    // bank receipt hash (optional) [cite: 84]
+    // starts from 1 [cite: 85]
+    // multisig/role [cite: 86]
     event MonthlySettlementStored( // "YYYY-MM" [cite: 77]
-        // [cite: 78]
-        // kWh*10 [cite: 79]
-        // kWh*10 [cite: 80]
-        // tariff * 10000 [cite: 81]
-        // aggregated hash [cite: 82]
-        // State Grid bill PDF hash [cite: 83]
-        // bank receipt hash (optional) [cite: 84]
-        // starts from 1 [cite: 85]
-        // multisig/role [cite: 86]
         string period,
         string stationId,
         uint256 gridDeliveredKWh_x10,
